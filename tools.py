@@ -350,7 +350,8 @@ def _check_one(product, version, warn_days, ref=None):
 def _check_item(item, warn_days, ref):
     """Check one {product, version} / {purl} / {cpe} item; never raises."""
     item = item if isinstance(item, dict) else {}
-    product = str(item.get("product") or "").strip()
+    # Models calling without the schema often guess "name" for the product.
+    product = str(item.get("product") or item.get("name") or "").strip()
     version = str(item.get("version") or "").strip()
     try:
         ident_product, ident_version, ident = _resolve_identifier(item)
@@ -453,10 +454,12 @@ def eol_check(args: dict, **kwargs) -> str:
     except ValueError as e:
         return json.dumps({"error": str(e)})
     items = args.get("items")
-    if not items and (args.get("product") or args.get("purl") or args.get("cpe")):
-        items = [{k: args.get(k) for k in ("product", "version", "purl", "cpe") if args.get(k)}]
+    if not items and any(args.get(k) for k in ("product", "name", "purl", "cpe")):
+        items = [{k: args.get(k) for k in ("product", "name", "version", "purl", "cpe") if args.get(k)}]
     if not items or not isinstance(items, list):
-        return json.dumps({"error": "Provide product+version, purl, cpe, or items: [...]"})
+        return json.dumps({"error": "Provide product+version, purl, cpe, or items. Example: "
+                                    '{"items": [{"product": "python", "version": "3.9.7"}, '
+                                    '{"purl": "pkg:pypi/django@4.2.11"}]}'})
     if len(items) > MAX_ITEMS:
         return json.dumps({"error": f"Too many items ({len(items)}); the limit is {MAX_ITEMS}"})
 

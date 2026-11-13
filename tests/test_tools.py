@@ -123,6 +123,12 @@ class EolToolsTest(unittest.TestCase):
         self.assertEqual(out["summary"]["unknown"], 1)
         self.assertIn("python", out["results"][2]["did_you_mean"])
 
+    def test_check_accepts_name_as_product(self, _):
+        r = json.loads(tools.eol_check({"name": "python", "version": "3.9.7"}))["results"][0]
+        self.assertEqual((r["product"], r["status"]), ("python", "eol"))
+        r = json.loads(tools.eol_check({"items": [{"name": "ubuntu", "version": "22.04"}]}))["results"][0]
+        self.assertEqual(r["product"], "ubuntu")
+
     def test_check_requires_input(self, _):
         self.assertIn("error", json.loads(tools.eol_check({})))
 
