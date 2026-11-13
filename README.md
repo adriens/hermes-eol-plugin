@@ -83,8 +83,9 @@ produced by one of these can be passed straight to `eol_check`.
 
 ### Combinations worth trying
 
-Scenarios to test `eol` together with other catalog plugins. The osv-ref one
-was run end to end (see the catalog PR); the others are suggestions.
+Scenarios to test `eol` together with other catalog plugins. The osv-ref and
+patch-sentinel ones were run end to end (see the catalog PR); the others are
+suggestions.
 
 | With | Try asking | What each plugin contributes |
 |---|---|---|
