@@ -6,7 +6,7 @@ that may be a year old. This plugin gives the agent live lifecycle data from
 systems, databases, frameworks, cloud services — so support dates come from the
 source, not from memory.
 
-From the author of [geol](https://github.com/opt-nc/geol), the endoflife.date CLI.
+Written by a contributor to [geol](https://github.com/opt-nc/geol), the endoflife.date CLI.
 This plugin calls the endoflife.date API directly: no binary to install, stdlib
 only, no API key. It reads and writes geol's `.geol.yaml` stack files, so what
 the agent inventories can be enforced in CI with `geol check --strict`.
