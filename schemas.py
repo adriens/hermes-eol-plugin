@@ -3,8 +3,9 @@
 EOL_SEARCH = {
     "name": "eol_search",
     "description": (
-        "Find the endoflife.date identifier of a product (e.g. 'postgres' -> "
-        "'postgresql', 'node' -> 'nodejs', 'k8s' -> 'kubernetes'). Matches names, "
+        "Find a product's endoflife.date id by name, alias, category or tag. "
+        "Examples: 'postgres' -> 'postgresql', 'node' -> 'nodejs', 'k8s' -> "
+        "'kubernetes'. Matches names, "
         "aliases, labels, categories and tags. Use it when eol_product or eol_check "
         "reports an unknown product, or to list products in a category "
         "(lang, os, database, framework, server-app, ...). With list, returns every "
@@ -33,7 +34,8 @@ EOL_SEARCH = {
 EOL_PRODUCT = {
     "name": "eol_product",
     "description": (
-        "Get the release cycles of a product with their release date, LTS flag, "
+        "Release cycles, LTS and end-of-life dates of one product (endoflife.date). "
+        "Returns the release cycles of a product with their release date, LTS flag, "
         "end of active support, end of life (security support) date, and latest "
         "patch version, from endoflife.date. Use this instead of answering from "
         "memory whenever the user asks which versions of something are supported, "
@@ -63,7 +65,8 @@ EOL_PRODUCT = {
 EOL_CHECK = {
     "name": "eol_check",
     "description": (
-        "Check whether specific versions are still supported. For each "
+        "Check if versions are end-of-life or still supported (name, purl or CPE). "
+        "For each "
         "product/version pair, returns the matching release cycle, a status "
         "(supported, security-only, eol or unknown), the end-of-life date, days "
         "left, whether a newer patch exists, the newest maintained cycle to "
@@ -122,7 +125,8 @@ EOL_CHECK = {
 EOL_STACK_CHECK = {
     "name": "eol_stack_check",
     "description": (
-        "Check a geol stack file (.geol.yaml, the format of the geol CLI) with "
+        "Check a geol .geol.yaml stack file for end-of-life versions and LTS policy. "
+        "Checks a geol stack file (.geol.yaml, the format of the geol CLI) with "
         "the same rules as 'geol check --strict': each component gets OK, WARN "
         "(under 30 days left), EOL or ERROR; skip, manual_eol, lts_strategy "
         "(any | latest), lts_grace_days and always-latest are enforced, and "
@@ -148,13 +152,17 @@ EOL_STACK_CHECK = {
 EOL_STACK_FILE = {
     "name": "eol_stack_file",
     "description": (
-        "Generate the text of a geol stack file (.geol.yaml) from the components "
+        "Create the content of a geol .geol.yaml stack file from project components. "
+        "Use this whenever a .geol.yaml (geol stack file) must be created or "
+        "updated: it knows the format, so do not look for examples or write the "
+        "YAML by hand. Generates the text of the stack file from the components "
         "of a project, so its end-of-life status can be tracked with geol in CI. "
         "First find the versions actually in use (Dockerfile FROM lines, "
         ".nvmrc, .python-version, pyproject.toml, package.json engines, go.mod, "
         "CI images, ...), then pass them here. Every product is resolved to its "
         "endoflife.date id; unknown ones are kept with skip: true. This tool does "
-        "not write anything: save the returned content with write_file."
+        "not write anything: save the returned content as-is with write_file, "
+        "then call eol_stack_check on it to report the status."
     ),
     "parameters": {
         "type": "object",

@@ -171,6 +171,7 @@ class StackFileTest(unittest.TestCase):
             {"product": "python", "version": "3.9.7"},
             {"product": "ubuntu", "version": "22.04", "lts_strategy": "latest", "lts_grace_days": 30},
             {"product": "my-lib", "version": "1.0"},
+            {"purl": "pkg:pypi/gunicorn@21.2.0"},
         ]}))
         doc = tools._load_yaml(out["content"])
         self.assertEqual(doc["geolVersion"], "2")
@@ -180,6 +181,8 @@ class StackFileTest(unittest.TestCase):
         self.assertEqual(doc["stack"][1]["lts_grace_days"], 30)
         self.assertTrue(doc["stack"][2]["skip"])
         self.assertEqual(out["unresolved"][0]["name"], "my-lib")
+        self.assertEqual(doc["stack"][3], {"name": "gunicorn", "version": "21.2.0",
+                                           "id_eol": "gunicorn", "skip": True})
 
     def test_round_trip_through_stack_check(self, _):
         out = json.loads(tools.eol_stack_file({"app_name": "x", "items": [

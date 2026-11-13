@@ -643,6 +643,13 @@ def eol_stack_file(args: dict, **kwargs) -> str:
         except ApiError as e:
             return json.dumps({"error": str(e)})
 
+        # An unmapped purl/cpe still names a package: "pkg:pypi/gunicorn@21" -> "gunicorn".
+        ident_name = None
+        if ident and item.get("purl"):
+            ident_name = _purl_base(ident)[0].rsplit("/", 1)[-1] or None
+        elif ident:
+            ident_name = (_cpe_base(ident)[0] or "").rsplit(":", 1)[-1] or None
+        product = product or ident_name or ""
         name = str(item.get("name") or (doc or {}).get("label") or product or ident or "?").strip()
         if name in names:
             warnings.append(f"Duplicate name '{name}': geol needs unique names, add a suffix (e.g. -prod)")
