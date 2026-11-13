@@ -25,7 +25,7 @@ description: |
 maintainer: adriens
 tier: community
 category: tools
-requires_hermes: ">=0.21.5"
+requires_hermes: ">=0.23.0"
 docs_url: https://github.com/adriens/hermes-eol-plugin#readme
 readme: true
 platforms: []

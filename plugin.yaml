@@ -7,7 +7,7 @@ author: "Adrien Sales"
 license: MIT
 homepage: https://github.com/adriens/hermes-eol-plugin
 tags: [eol, lifecycle, security, devops, endoflife, geol, sbom, purl]
-requires_hermes: ">=0.21.5"
+requires_hermes: ">=0.23.0"
 provides_tools:
   - eol_search
   - eol_product
