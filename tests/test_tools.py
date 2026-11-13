@@ -9,6 +9,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import hints  # noqa: E402
 import tools  # noqa: E402
 
 try:
@@ -229,6 +230,35 @@ stack:
 
     def test_rejects_non_stack_yaml(self, _):
         self.assertIn("error", json.loads(tools.eol_stack_check({"content": "foo: bar"})))
+
+
+class HintTest(unittest.TestCase):
+
+    def test_matches_version_questions(self):
+        for msg in ("Is Python 3.9 still supported?",
+                    "@ghsa:GHSA-q238-5cxm-5c9h are we affected?",
+                    "Check our Dockerfile and docker-compose.yml",
+                    "Which Node.js LTS should we upgrade to?",
+                    "write a .geol.yaml for this repo",
+                    "CVE-2026-15830 impact on our stack"):
+            self.assertTrue(hints.wants_hint(msg), msg)
+
+    def test_ignores_unrelated_messages(self):
+        for msg in ("", "Summarize this meeting", "What's the weather in Noumea?",
+                    "Rename the variable foo to bar"):
+            self.assertFalse(hints.wants_hint(msg), msg)
+
+    def test_hook_respects_setting_and_never_raises(self):
+        ctx = mock.Mock()
+        ctx.get_config.return_value = True
+        hook = hints.make_hook(ctx)
+        self.assertEqual(hook(user_message="Is Ubuntu 22.04 EOL?")["context"], hints.HINT)
+        self.assertIsNone(hook(user_message="hello"))
+        ctx.get_config.return_value = False
+        self.assertIsNone(hook(user_message="Is Ubuntu 22.04 EOL?"))
+        ctx.get_config.side_effect = RuntimeError("boom")
+        self.assertIsNotNone(hook(user_message="Is Ubuntu 22.04 EOL?"))
+        self.assertIsNone(hook(user_message=None))
 
 
 if __name__ == "__main__":

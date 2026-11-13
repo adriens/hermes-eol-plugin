@@ -14,7 +14,7 @@ from datetime import date, datetime, timezone
 
 API_BASE = "https://endoflife.date/api/v1"
 SITE_BASE = "https://endoflife.date"
-USER_AGENT = "hermes-eol-plugin/0.2.0 (+https://github.com/adriens/hermes-eol-plugin)"
+USER_AGENT = "hermes-eol-plugin/0.3.0 (+https://github.com/adriens/hermes-eol-plugin)"
 TIMEOUT_S = 10
 CACHE_TTL_S = 6 * 3600
 MAX_ITEMS = 50

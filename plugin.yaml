@@ -1,5 +1,5 @@
 name: eol
-version: 0.2.0
+version: 0.3.0
 manifest_version: 2
 api_version: 1
 description: "End-of-life and support status for 480+ products (languages, OSes, databases, frameworks) from endoflife.date — so the agent stops guessing support dates from memory."
@@ -14,3 +14,10 @@ provides_tools:
   - eol_check
   - eol_stack_check
   - eol_stack_file
+provides_hooks:
+  - pre_llm_call
+config_schema:
+  context_hint:
+    type: bool
+    default: true
+    description: "When a message is about versions, upgrades or security fixes, add a one-line note pointing the model at the eol_* tools (local keyword match, nothing leaves the machine)"

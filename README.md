@@ -21,6 +21,20 @@ the agent inventories can be enforced in CI with `geol check --strict`.
 | `eol_stack_check` | Check a geol `.geol.yaml` with the same rules as `geol check --strict`: OK / WARN / EOL per component, `skip`, `manual_eol`, `lts_strategy` (`any` / `latest`), `lts_grace_days`, `always-latest`. |
 | `eol_stack_file` | Generate a `.geol.yaml` from the components the agent found in a project (Dockerfile, `.nvmrc`, `pyproject.toml`, CI images, SBOM…). Products are resolved to their endoflife.date id, versions to the release cycle geol expects, unknown products are kept with `skip: true`. The tool returns the text; the agent saves it with Hermes' own `write_file`, under the usual approvals. |
 
+### Context hint
+
+Hermes keeps plugin tools behind its tool search, where the model only sees a
+one-line summary of each, so a model asked *"should we upgrade?"* tends to
+answer from memory. When a message is about versions, upgrades, end of life,
+CVEs or files that pin versions (Dockerfile, `docker-compose.yml`, `.nvmrc`,
+`requirements.txt`, `.geol.yaml`, SBOMs…), a `pre_llm_call` hook appends one
+fixed note to that turn pointing the model at the `eol_*` tools. The match is a
+local keyword regex; nothing is sent anywhere. Turn it off with:
+
+```bash
+hermes config set plugins.entries.eol.settings.context_hint false
+```
+
 Things to try:
 
 ```
@@ -79,7 +93,10 @@ workflow) and exports endoflife.date to DuckDB or SQLite.
 - **No file access:** the plugin reads and writes no files. `eol_stack_check`
   receives the YAML text from the agent; `eol_stack_file` returns text that the
   agent writes with `write_file`, through Hermes' approvals.
-- **No credentials**, no environment variables, no settings, no shell commands,
+- **Context hint:** a `pre_llm_call` hook reads the current user message,
+  matches it against a keyword list locally and, on a match, appends a fixed
+  one-paragraph note to that turn. Disable it with the `context_hint` setting.
+- **No credentials**, no environment variables, no shell commands,
   no background processes, no telemetry.
 - Responses are cached in memory for 6 hours to stay polite to the API; nothing
   is persisted.
