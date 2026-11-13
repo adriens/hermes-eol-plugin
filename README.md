@@ -81,6 +81,22 @@ produced by one of these can be passed straight to `eol_check`.
 | [Compound Security](https://github.com/offense-research/compound-security-plugin) (`compound-security`) | Skills for security audit, dependency inspection, remediation and verification. |
 | [Security](https://github.com/NousResearch/hermes-official-plugins) (`hermes-security`, official) | Threat-model-driven security review of a repository. |
 
+### Combinations worth trying
+
+Scenarios to test `eol` together with other catalog plugins. The osv-ref one
+was run end to end (see the catalog PR); the others are suggestions.
+
+| With | Try asking | What each plugin contributes |
+|---|---|---|
+| `osv-ref` | `@ghsa:<id>` *Are we affected? Which version should we move to, and must the rest of the stack move with it?* | osv-ref: the advisory and its fixed versions. eol: whether the affected branch will ever get a fix, and the status of every other component. |
+| `patch-sentinel` | *Audit this machine: is it patched, and is what it runs still supported?* | Patch Sentinel: missing patches on the host and a CycloneDX SBOM. eol: support and end-of-life dates for the OS release and the components in that SBOM (by purl). |
+| [`kubernetes`](https://github.com/TakeshiTGAL/hermes-plugin-kubernetes) | *Which images running in namespace X are end-of-life?* | kubernetes: the images and versions actually running in the pods. eol: their status, plus the cluster version itself. |
+| [`terraform-drift`](https://github.com/TakeshiTGAL/hermes-plugin-terraform-drift) | *What is outdated or end-of-life in this infrastructure?* | terraform-drift: providers and modules behind the registry. eol: the managed services and engines they deploy (`amazon-rds-postgresql`, `amazon-eks`, `azure-kubernetes-service`, …). |
+| [`cooldown`](https://github.com/Savage27z/cooldown) | *Upgrade this project off its end-of-life versions.* | eol: the target versions. cooldown: checks each package install for malicious or too-recent releases before it runs. |
+| [`ci-red-to-green`](https://github.com/kinnuworks/ci-red-to-green) | *(after the upgrade lands)* | eol: the upgrade plan. ci-red-to-green: which tests broke in GitHub Actions and the commits since the last green run. |
+| [`gh-ref`](https://github.com/EloquentBrush0x/hermes-context-refs) | `@gh:owner/repo#123` *Work on this upgrade issue.* | gh-ref: the issue as context. eol: the facts to plan the upgrade on. |
+| Hermes cron (built in) | *Every Monday, run eol_stack_check on .geol.yaml and message me if anything turns WARN or EOL.* | A scheduled run turns the stack file into an early warning. |
+
 Outside Hermes, [geol](https://github.com/opt-nc/geol) runs the same checks on
 the `.geol.yaml` in CI (`geol ci-github init` generates the GitHub Actions
 workflow) and exports endoflife.date to DuckDB or SQLite.
