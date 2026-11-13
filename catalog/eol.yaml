@@ -4,19 +4,22 @@ name: eol
 title: End-of-Life Checks
 repo: https://github.com/adriens/hermes-eol-plugin
 sha: 0000000000000000000000000000000000000000
-version: "0.1.0"
+version: "0.2.0"
 description: |
-  Live end-of-life and support status for 480+ products (languages, OSes, databases, frameworks, cloud services) from endoflife.date, so the agent stops answering support dates from memory.
+  Live end-of-life and support status for 480+ products (languages, OSes, databases, frameworks, cloud services) from endoflife.date, so the agent stops answering support dates from memory. Reads and writes geol (.geol.yaml) stack files.
 
-  - eol_search: find a product's identifier from a name, alias, category or tag
-  - eol_product: every release cycle with release date, LTS, end of active support, end of life and latest patch
-  - eol_check: check one or many product/version pairs (a Dockerfile, a lockfile, a whole stack) for supported / security-only / eol, days left, newer patch, and the next LTS to upgrade to
+  - eol_search: find a product's identifier from a name, alias, category or tag; list categories and tags
+  - eol_product: every release cycle with release date, LTS, end of active support, end of life, latest patch, and the product's purl/CPE identifiers
+  - eol_check: check many components at once, by product+version, purl (e.g. from an SBOM) or CPE, today or at any date: supported / security-only / eol, days left, newer patch, LTS-aware upgrade target, maintained cycles
+  - eol_stack_check: check a .geol.yaml with geol check --strict rules (skip, manual_eol, lts_strategy, lts_grace_days, always-latest)
+  - eol_stack_file: generate a .geol.yaml from the components found in a project; the agent writes it with write_file
   - Complements CVE scanners such as Patch Sentinel: they ask "am I patched?", this asks "is this version still supported by its vendor?"
 
   Disclosures
-  - Network: HTTPS GET to endoflife.date/api/v1 when a tool is called; only the product name looked up is sent.
-  - No credentials, no file access, no shell commands, no background processes; 6-hour in-memory cache only.
-  - Stdlib only, no Python dependencies.
+  - Network: HTTPS GET to endoflife.date/api/v1 when a tool is called; only product names are sent (plus fetching the public purl/CPE mapping tables).
+  - No file access: stack files are passed in and returned as text; writing goes through Hermes' write_file and its approvals.
+  - No credentials, no shell commands, no background processes; 6-hour in-memory cache only.
+  - Stdlib only, no Python dependencies (YAML via Hermes' public hermes_yaml helper).
 maintainer: adriens
 tier: community
 category: tools
@@ -25,7 +28,7 @@ docs_url: https://github.com/adriens/hermes-eol-plugin#readme
 readme: true
 platforms: []
 capabilities:
-  provides_tools: [eol_search, eol_product, eol_check]
+  provides_tools: [eol_search, eol_product, eol_check, eol_stack_check, eol_stack_file]
   provides_hooks: []
   provides_middleware: []
   requires_env: []

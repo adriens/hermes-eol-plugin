@@ -1,14 +1,16 @@
 name: eol
-version: 0.1.0
+version: 0.2.0
 manifest_version: 2
 api_version: 1
 description: "End-of-life and support status for 480+ products (languages, OSes, databases, frameworks) from endoflife.date — so the agent stops guessing support dates from memory."
 author: "Adrien Sales"
 license: MIT
 homepage: https://github.com/adriens/hermes-eol-plugin
-tags: [eol, lifecycle, security, devops, endoflife]
+tags: [eol, lifecycle, security, devops, endoflife, geol, sbom, purl]
 requires_hermes: ">=0.21.5"
 provides_tools:
   - eol_search
   - eol_product
   - eol_check
+  - eol_stack_check
+  - eol_stack_file

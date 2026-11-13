@@ -10,3 +10,7 @@ def register(ctx):
                       schema=schemas.EOL_PRODUCT, handler=tools.eol_product)
     ctx.register_tool(name="eol_check", toolset="eol",
                       schema=schemas.EOL_CHECK, handler=tools.eol_check)
+    ctx.register_tool(name="eol_stack_check", toolset="eol",
+                      schema=schemas.EOL_STACK_CHECK, handler=tools.eol_stack_check)
+    ctx.register_tool(name="eol_stack_file", toolset="eol",
+                      schema=schemas.EOL_STACK_FILE, handler=tools.eol_stack_file)

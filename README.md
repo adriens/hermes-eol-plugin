@@ -8,23 +8,29 @@ source, not from memory.
 
 From the author of [geol](https://github.com/opt-nc/geol), the endoflife.date CLI.
 This plugin calls the endoflife.date API directly: no binary to install, stdlib
-only, no API key.
+only, no API key. It reads and writes geol's `.geol.yaml` stack files, so what
+the agent inventories can be enforced in CI with `geol check --strict`.
 
 ## Tools
 
 | Tool | What it does |
 |---|---|
-| `eol_search` | Find a product's identifier from a name, alias, category or tag (`postgres` → `postgresql`, `k8s` → `kubernetes`). |
-| `eol_product` | All release cycles of a product: release date, LTS, end of active support, end of life, latest patch. |
-| `eol_check` | Check one or many `product`/`version` pairs: matching cycle, status (`supported`, `security-only`, `eol`, `unknown`), days until EOL, whether a newer patch exists, and what to upgrade to (the next LTS for an LTS line). |
+| `eol_search` | Find a product's identifier from a name, alias, category or tag (`postgres` → `postgresql`, `k8s` → `kubernetes`), or list every category / tag. |
+| `eol_product` | All release cycles of a product: release date, LTS, end of active support, end of life, latest patch — plus its package identifiers (purl, CPE). |
+| `eol_check` | Check one or many components: status (`supported`, `security-only`, `eol`, `unknown`), days until EOL, newer patch available, upgrade target (next LTS for an LTS line) and the list of cycles still maintained. Components can be given as product + version, **purl** (`pkg:pypi/django@4.2.11`) or **CPE**, and checked **at any date** (`date: 2027-06-01`). |
+| `eol_stack_check` | Check a geol `.geol.yaml` with the same rules as `geol check --strict`: OK / WARN / EOL per component, `skip`, `manual_eol`, `lts_strategy` (`any` / `latest`), `lts_grace_days`, `always-latest`. |
+| `eol_stack_file` | Generate a `.geol.yaml` from the components the agent found in a project (Dockerfile, `.nvmrc`, `pyproject.toml`, CI images, SBOM…). Products are resolved to their endoflife.date id, versions to the release cycle geol expects, unknown products are kept with `skip: true`. The tool returns the text; the agent saves it with Hermes' own `write_file`, under the usual approvals. |
 
 Things to try:
 
 ```
 Which Node.js versions are still supported?
 Is Ubuntu 22.04 still getting security updates? Until when?
-Check the base images and runtimes in this Dockerfile for end-of-life versions.
 Our stack is Python 3.9.7, PostgreSQL 13, Kubernetes 1.30 — what needs upgrading first?
+What in this stack will be end-of-life by June 2027?
+Inventory the runtimes and base images of this repo and write a .geol.yaml for it.
+Check our .geol.yaml and tell me what blocks the release.
+Here is our CycloneDX SBOM: which components are end-of-life?
 ```
 
 ## Install
@@ -42,23 +48,51 @@ hermes plugins enable eol
 hermes plugins doctor ~/.hermes/plugins/eol --ci
 ```
 
+## Works well with
+
+The Hermes catalog has plugins that answer *"is this vulnerable?"*; this one
+answers *"is this version still supported by its vendor?"*. A version can be
+patched today and unsupported tomorrow, and an EOL version stops receiving the
+fixes those scanners look for — the two questions complement each other.
+Package URLs (purl) are the shared vocabulary: components listed in an SBOM
+produced by one of these can be passed straight to `eol_check`.
+
+| Plugin | What it adds next to `eol` |
+|---|---|
+| [Patch Sentinel](https://github.com/thebangarang/Patch-Sentinel) (`patch-sentinel`) | "Are we patched?" for the host: OS packages, kernel, containers and 9 language ecosystems against vendor advisories and OSV, plus a CycloneDX SBOM (`cve_sbom`) whose purls `eol_check` accepts. |
+| [warden](https://gitlab.com/Zaygalx1/warden) | Defensive security operations with scoped vulnerability assessment (Grype and Trivy over one Syft SBOM). |
+| [Snyk](https://github.com/NousResearch/hermes-official-plugins) (`snyk`, official) | Snyk scans of code, dependencies, container images, IaC and SBOMs. |
+| [OSV references](https://github.com/EloquentBrush0x/hermes-context-refs) (`osv-ref`) | `@cve:`, `@ghsa:`, `@osv:` references that attach an OSV.dev vulnerability record, with affected and fixed versions, to a message. |
+| [hermes-security-audit](https://github.com/dafka007/hermes-security-audit) | Approval-gated local audit with Gitleaks, OSV-Scanner and Semgrep CE. |
+| [Compound Security](https://github.com/offense-research/compound-security-plugin) (`compound-security`) | Skills for security audit, dependency inspection, remediation and verification. |
+| [Security](https://github.com/NousResearch/hermes-official-plugins) (`hermes-security`, official) | Threat-model-driven security review of a repository. |
+
+Outside Hermes, [geol](https://github.com/opt-nc/geol) runs the same checks on
+the `.geol.yaml` in CI (`geol ci-github init` generates the GitHub Actions
+workflow) and exports endoflife.date to DuckDB or SQLite.
+
 ## What it does on your machine (disclosure)
 
 - **Network:** HTTPS GET requests to `https://endoflife.date/api/v1/` only, when
-  one of the tools is called. The request carries the product name being looked
-  up — never file contents, paths or other session data.
-- **No credentials**, no environment variables, no settings.
-- **No file reads or writes**, no shell commands, no background processes.
+  one of the tools is called. Requests carry product names (and fetch the public
+  purl/CPE mapping tables) — never file contents, paths or other session data.
+- **No file access:** the plugin reads and writes no files. `eol_stack_check`
+  receives the YAML text from the agent; `eol_stack_file` returns text that the
+  agent writes with `write_file`, through Hermes' approvals.
+- **No credentials**, no environment variables, no settings, no shell commands,
+  no background processes, no telemetry.
 - Responses are cached in memory for 6 hours to stay polite to the API; nothing
   is persisted.
-- No telemetry.
 
 ## Development
 
 ```bash
-python3 -m unittest discover -s tests -v    # offline, HTTP is mocked
-hermes plugins validate . --install-deps    # the check catalog CI runs
+~/.hermes/hermes-agent/venv/bin/python -m unittest discover -s tests -v   # offline, HTTP mocked
+hermes plugins validate . --install-deps                                  # what catalog CI runs
 ```
+
+Stack-file tests need a YAML parser: Hermes' `hermes_yaml` (hence Hermes'
+Python above) or PyYAML; with neither, they are skipped.
 
 ## Credits
 
