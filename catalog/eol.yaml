@@ -1,0 +1,31 @@
+# Draft for NousResearch/hermes-agent: copy to plugin-catalog/eol.yaml in the PR.
+# Replace sha with the full 40-character commit you validated.
+name: eol
+title: End-of-Life Checks
+repo: https://github.com/adriens/hermes-eol-plugin
+sha: 0000000000000000000000000000000000000000
+version: "0.1.0"
+description: |
+  Live end-of-life and support status for 480+ products (languages, OSes, databases, frameworks, cloud services) from endoflife.date, so the agent stops answering support dates from memory.
+
+  - eol_search: find a product's identifier from a name, alias, category or tag
+  - eol_product: every release cycle with release date, LTS, end of active support, end of life and latest patch
+  - eol_check: check one or many product/version pairs (a Dockerfile, a lockfile, a whole stack) for supported / security-only / eol, days left, newer patch, and the next LTS to upgrade to
+  - Complements CVE scanners such as Patch Sentinel: they ask "am I patched?", this asks "is this version still supported by its vendor?"
+
+  Disclosures
+  - Network: HTTPS GET to endoflife.date/api/v1 when a tool is called; only the product name looked up is sent.
+  - No credentials, no file access, no shell commands, no background processes; 6-hour in-memory cache only.
+  - Stdlib only, no Python dependencies.
+maintainer: adriens
+tier: community
+category: tools
+requires_hermes: ">=0.21.5"
+docs_url: https://github.com/adriens/hermes-eol-plugin#readme
+readme: true
+platforms: []
+capabilities:
+  provides_tools: [eol_search, eol_product, eol_check]
+  provides_hooks: []
+  provides_middleware: []
+  requires_env: []
